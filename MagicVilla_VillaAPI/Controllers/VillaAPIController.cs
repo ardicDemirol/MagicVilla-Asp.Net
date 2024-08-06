@@ -14,6 +14,8 @@ namespace MagicVilla_VillaAPI.Controllers
     {
         private readonly ILogging _logger;
         private readonly ApplicationDbContext _dbContext;
+
+
         public VillaAPIController(ILogging logger, ApplicationDbContext context)
         {
             _logger = logger;
@@ -47,6 +49,7 @@ namespace MagicVilla_VillaAPI.Controllers
             if (villa == null) return NotFound();
 
             return Ok(villa);
+
         }
 
 

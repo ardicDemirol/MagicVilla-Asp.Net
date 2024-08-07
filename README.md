@@ -7,7 +7,7 @@ Key Features:
 * Postman
 * Sirilog
 * EF core
-* .net 7
+* .NET 7
 * SQL DB
 
 ## --> Before caching with redis

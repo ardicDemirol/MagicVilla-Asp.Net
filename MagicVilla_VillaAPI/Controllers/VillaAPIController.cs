@@ -2,8 +2,10 @@
 using MagicVilla_VillaAPI.Logging;
 using MagicVilla_VillaAPI.Models;
 using MagicVilla_VillaAPI.Models.Dto;
+using MagicVilla_VillaAPI.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MagicVilla_VillaAPI.Controllers
 {
@@ -13,22 +15,69 @@ namespace MagicVilla_VillaAPI.Controllers
     public class VillaAPIController : ControllerBase
     {
         private readonly ILogging _logger;
+        private readonly ICacheService _cacheService;
+
         private readonly ApplicationDbContext _dbContext;
 
 
-        public VillaAPIController(ILogging logger, ApplicationDbContext context)
+        public VillaAPIController(ILogging logger, ApplicationDbContext context, ICacheService cacheService)
         {
             _logger = logger;
             _dbContext = context;
+            _cacheService = cacheService;
         }
+
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //public async Task<IActionResult> GetVillas()
+        //{
+        //    var cacheData = _cacheService.GetData<IEnumerable<VillaDto>>("Villas");
+
+        //    if (cacheData != null && cacheData.Count() > 0)
+        //    {
+        //        _logger.Log("Getting all villas from cache", "info");
+        //        return Ok(cacheData);
+        //    }
+
+        //    _logger.Log("Getting all villas", "info");
+        //    cacheData = (IEnumerable<VillaDto>?)await _dbContext.Villas.ToListAsync();
+
+
+        //    // Set expiry time to 30 seconds
+        //    var expiryTime = DateTimeOffset.Now.AddSeconds(30);
+        //    _cacheService.SetData("Villas", cacheData, expiryTime);
+
+        //    return Ok(cacheData);
+
+        //}
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<VillaDto>> GetVillas()
+        public async Task<IActionResult> GetVillas()
         {
+            var cacheData = _cacheService.GetData<IEnumerable<VillaDto>>("Villas");
+
+            if (cacheData != null && cacheData.Count() > 0)
+            {
+                _logger.Log("Getting all villas from cache", "info");
+                return Ok(cacheData);
+            }
+
             _logger.Log("Getting all villas", "info");
-            return Ok(_dbContext.Villas.ToList());
+            var villas = await _dbContext.Villas.ToListAsync();
+            cacheData = villas.Select(v => new VillaDto
+            {
+                Id = v.Id,
+                Name = v.Name,
+            });
+
+            // Set expiry time to 30 seconds
+            var expiryTime = DateTimeOffset.Now.AddSeconds(30);
+            _cacheService.SetData("Villas", cacheData, expiryTime);
+
+            return Ok(cacheData);
         }
+
 
 
 
@@ -174,11 +223,16 @@ namespace MagicVilla_VillaAPI.Controllers
         {
             if (id == 0) return BadRequest("Villa doesn't exist");
             var villa = _dbContext.Villas.FirstOrDefault(v => v.Id == id);
-            if (villa == null) return NotFound();
 
-            _dbContext.Villas.Remove(villa);
-            _dbContext.SaveChanges();
-            return NoContent();
+            if (villa != null)
+            {
+                _dbContext.Villas.Remove(villa);
+                _cacheService.RemoveData($"Villas{id}");
+                _dbContext.SaveChanges();
+                return NoContent();
+            }
+
+            return NotFound();
         }
 
 

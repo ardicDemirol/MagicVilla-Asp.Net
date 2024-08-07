@@ -1,5 +1,6 @@
 using MagicVilla_VillaAPI.Data;
 using MagicVilla_VillaAPI.Logging;
+using MagicVilla_VillaAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICacheService, CacheServices>();
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
@@ -29,7 +32,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

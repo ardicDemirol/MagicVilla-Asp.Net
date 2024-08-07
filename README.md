@@ -6,6 +6,7 @@ Key Features:
 * Redis
 * Postman
 * Sirilog
+* Docker
 * EF core
 * .NET 7
 * SQL DB

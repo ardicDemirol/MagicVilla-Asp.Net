@@ -5,7 +5,7 @@ DockerHub Link : https://hub.docker.com/r/ardicdemirol/magicvilla
 Key Features:
 * Redis
 * Postman
-* Sirilog
+* Serilog
 * Docker
 * EF core
 * .NET 7

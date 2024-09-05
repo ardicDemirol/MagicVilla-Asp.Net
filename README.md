@@ -9,7 +9,7 @@ Key Features:
 * Docker
 * EF core
 * .NET 7
-* SQL DB
+* MSSQL
 
 ## --> Before caching with redis
 ![Ekran görüntüsü 2024-08-07 213107](https://github.com/user-attachments/assets/547e4b40-d4b0-4b66-8520-6435a333e591)
